@@ -12,11 +12,17 @@
 <div class="main">
     <div class="login-page">
         <form id="sign-in-form" method="POST">
+            <blockquote class="message-wrapper hide">
+
+            </blockquote>
             Url: <input type="text" name="host" placeholder="https://jira.example.com/" /> <br/>
             Username: <input type="text" name="user" placeholder="John" /> <br/>
             Password: <input type="password" name="pass" placeholder="Doe" /> <br/>
             <input class="waves-effect waves-light btn" type="submit" value="Log in" name="Submit">
         </form>
+    </div>
+    <div class="overview-page hide">
+        overview
     </div>
 </div>
 <script src="app.js"></script>

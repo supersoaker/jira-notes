@@ -8,7 +8,7 @@ import './helpers/external_links.js';
 import {remote} from 'electron';
 import jetpack from 'fs-jetpack';
 // import { greet } from './hello_world/hello_world';
-import {login} from './jira/api';
+import {getProjects} from './jira/api';
 import env from './env';
 
 const app = remote.app;
@@ -24,20 +24,59 @@ const osMap = {
     linux: 'Linux',
 };
 
-// document.querySelector('#os').innerHTML = osMap[process.platform];
-// document.querySelector('#author').innerHTML = manifest.author;
-// document.querySelector('#env').innerHTML = env.name;
-// document.querySelector('#electron-version').innerHTML = process.versions.electron;
-
+let showPage = (pageName) => {
+    let otherPages = document.querySelectorAll('.main>[class$="-page"]');
+    let pageElem = document.querySelector(`.main > .${pageName}-page`);
+    otherPages.forEach((elem) => {
+        if(elem !== pageElem) {
+            elem.classList.add('hide');
+        }
+    });
+    if (pageElem) {
+        pageElem.classList.remove('hide');
+    }
+};
+let showError = (msg) => {
+    if(!msg) {
+        document.querySelector('.message-wrapper').classList.add('hide');
+        document.querySelector('.message-wrapper').classList.remove('error');
+    } else {
+        document.querySelector('.message-wrapper').classList.add('error');
+        document.querySelector('.message-wrapper').classList.remove('hide');
+        document.querySelector('.message-wrapper').innerHTML = msg;
+    }
+};
+if (localStorage.getItem('jira-host')) {
+    showPage('overview');
+}
 document.querySelector('#sign-in-form').addEventListener('submit', (e) => {
     let form = new FormData(e.target);
-    console.log(e.target);
-    console.log(form.get('url'));
     try {
-        
-    login(form.get('host'), form.get('user'), form.get('pass'));
+        /** @var XMLHTTPRequest xhr */
+        let xhr = getProjects(form.get('host'), form.get('user'), form.get('pass'));
+        if (xhr.status == 200) {
+            localStorage.setItem('jira-host', form.get('host'));
+            localStorage.setItem('jira-user', form.get('user'));
+            localStorage.setItem('jira-pass', form.get('pass'));
+        }
+        if (xhr.status == 401 || xhr.status == 403) {
+            showError('Bad credentials');
+        }
+        if(xhr.responseText == '[]') {
+            showError('Wrong url or no projects available');
+        }
+        if(xhr.status === 0) {
+            showError('Error when accessing url');
+        }
+        // if (client.status == 200)
+        //     alert("The request succeeded!\n\nThe response representation was:\n\n" + client.responseText)
+        // else
+        //     alert("The request did not succeed!\n\nThe response status was: " + client.status + " " + client.statusText + ".");
+        console.log(xhr);
     } catch (e) {
+        showError('Error when accessing url');
         console.log(e);
+        console.error(e);
     }
     e.preventDefault();
     return false;
