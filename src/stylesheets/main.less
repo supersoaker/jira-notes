@@ -20,18 +20,22 @@ a {
 .container {
   text-align: center;
 }
+
 .main {
   display: grid;
   grid-template-columns: 100%;
   grid-template-rows: 100%;
   width: 100%;
   height: 100%;
-  grid-template-areas:"main";
+  grid-template-areas: "main";
 }
+
 .login-page {
   display: grid;
   grid-area: main;
   #sign-in-form {
+    .shadow-depth-5;
+    padding: 50px;
     align-self: center;
     justify-self: center;
     max-width: 500px;
@@ -41,4 +45,16 @@ a {
 
 .hide {
   display: none;
+}
+
+blockquote {
+  &.error {
+    border-left-color: firebrick;
+    overflow: hidden;
+  }
+}
+
+.shadow-depth-5 {
+  -webkit-box-shadow: 0 16px 24px 2px rgba(0, 0, 0, 0.14), 0 6px 30px 5px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 16px 24px 2px rgba(0, 0, 0, 0.14), 0 6px 30px 5px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.3);
 }

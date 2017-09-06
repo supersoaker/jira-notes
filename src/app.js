@@ -41,9 +41,9 @@ let showError = (msg) => {
         document.querySelector('.message-wrapper').classList.add('hide');
         document.querySelector('.message-wrapper').classList.remove('error');
     } else {
-        document.querySelector('.message-wrapper').classList.add('error');
-        document.querySelector('.message-wrapper').classList.remove('hide');
         document.querySelector('.message-wrapper').innerHTML = msg;
+        document.querySelector('.message-wrapper').classList.remove('hide');
+        document.querySelector('.message-wrapper').classList.add('error');
     }
 };
 if (localStorage.getItem('jira-host')) {
