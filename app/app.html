@@ -6,6 +6,9 @@
     <!--<link href="vendor/materialize/css/materialize.min.css" rel="stylesheet" type="text/css">-->
     <link href="vendor/miligram/milligram.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="stylesheets/main.css">
+    <link rel="stylesheet" href="vendor/flatpickr/flatpickr.min.css">
+    <script src="vendor/flatpickr/flatpickr.min.js"></script>
+
 </head>
 <body>
 
@@ -15,14 +18,25 @@
             <blockquote class="message-wrapper hide">
 
             </blockquote>
-            Url: <input type="text" name="host" placeholder="https://jira.example.com/" /> <br/>
-            Username: <input type="text" name="user" placeholder="John" /> <br/>
-            Password: <input type="password" name="pass" placeholder="Doe" /> <br/>
+            Url: <input type="text" name="host" placeholder="https://jira.example.com/"/> <br/>
+            Username: <input type="text" name="user" placeholder="John"/> <br/>
+            Password: <input type="password" name="pass" placeholder="Doe"/> <br/>
             <input class="waves-effect waves-light btn" type="submit" value="Log in" name="Submit">
         </form>
     </div>
     <div class="overview-page hide">
         overview
+        <div class="sidebar shadow-depth-5">
+            <div class="calendar">
+                <input type="text">
+            </div>
+            <!--<div class="projects">-->
+                <!--<h3>Projekte</h3>-->
+                <!--<ul id="project-list">-->
+                    <!--<li></li>-->
+                <!--</ul>-->
+            <!--</div>-->
+        </div>
     </div>
 </div>
 <script src="app.js"></script>

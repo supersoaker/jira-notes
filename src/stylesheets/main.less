@@ -11,6 +11,7 @@ body {
   align-items: center;
   font-family: sans-serif;
   color: #525252;
+  min-width: 320px;
 }
 
 a {
@@ -42,7 +43,24 @@ a {
     max-height: 500px;
   }
 }
-
+.overview-page {
+  display: grid;
+  grid-template-columns: 30% 70%;
+  grid-template-areas: "sidebar main";
+  .sidebar {
+    grid-area: sidebar;
+  }
+  .calendar input {
+    border: none;
+    text-align: center;
+    font-weight: bold;
+    font-size: 2rem;
+    @media(max-width: 450px) {
+      font-size: 1.2rem;
+    }
+    color: #525252;
+  }
+}
 .hide {
   display: none;
 }
@@ -50,7 +68,6 @@ a {
 blockquote {
   &.error {
     border-left-color: firebrick;
-    overflow: hidden;
   }
 }
 
