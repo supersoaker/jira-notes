@@ -8,7 +8,7 @@ import './helpers/external_links.js';
 import {remote} from 'electron';
 import jetpack from 'fs-jetpack';
 // import { greet } from './hello_world/hello_world';
-import {callApi} from './jira/api';
+import {callApi,transformQuery} from './jira/api';
 import env from './env';
 const flatpickr = require("flatpickr");
 const app = remote.app;
@@ -26,7 +26,44 @@ const osMap = {
 
 flatpickr(".calendar input", {
     // inline: truedefaultDate: [new Date(), "2016-10-30"]
-    defaultDate: new Date()
+    defaultDate: new Date(),
+    onChange: function(obj, dateString) {
+        let user = localStorage.getItem('jira-user');
+        let xhr = apiCall(
+            localStorage.getItem('jira-host'),
+            user,
+            localStorage.getItem('jira-pass'),
+            `search?jql=timespent > 0 and worklogAuthor=${user} and worklogDate=${dateString}`
+        );
+        if (xhr.status === 200) {
+            let response = JSON.parse(xhr.responseText);
+            let worklogs = [];
+            let html = `
+                <tr>
+                    <td><textarea></textarea></td>
+                    <td><input type="text"></td>
+                    <td></td>
+                </tr>
+                `;
+            for (let i in response.issues) {
+                let tempXhr = apiCall(localStorage.getItem('jira-host'), user, localStorage.getItem('jira-pass'), `issue/${response.issues[i].id}/worklog`);
+                let worklog = JSON.parse(tempXhr.responseText).worklogs;
+                for (let j in worklog) {
+                    if(worklog[j].author.name === user) {
+                        html += `
+                        <tr>
+                            <td>${worklog[j].comment}</td>
+                            <td>${response.issues[i].key}</td>
+                            <td>${worklog[j].timeSpent}</td>
+                        </tr>
+                        `;
+                        worklogs.push(worklog);
+                    }
+                }
+            }
+            document.getElementById('worklog-list').innerHTML = html;
+        }
+    }
 });
 
 
@@ -52,6 +89,9 @@ let showError = (msg) => {
         document.querySelector('.message-wrapper').classList.add('error');
     }
 };
+
+window.apiCall = callApi;
+window.transformQuery = transformQuery;
 if (localStorage.getItem('jira-host')) {
     showPage('overview');
     // let xhr = callApi(
@@ -66,6 +106,7 @@ if (localStorage.getItem('jira-host')) {
     //     html +=  `<li>${project.name} (${project.key})</li>`;
     // });
     // document.getElementById('project-list').innerHTML = html;
+
 }
 
 
@@ -92,8 +133,6 @@ document.querySelector('#sign-in-form').addEventListener('submit', (e) => {
         }
     } catch (e) {
         showError('Error when accessing url');
-        // console.log(e);
-        // console.error(e);
     }
     e.preventDefault();
     return false;

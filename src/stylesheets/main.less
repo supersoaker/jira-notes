@@ -47,8 +47,19 @@ a {
   display: grid;
   grid-template-columns: 30% 70%;
   grid-template-areas: "sidebar main";
+  grid-template-rows: 100%;
   .sidebar {
     grid-area: sidebar;
+  }
+  .main {
+    grid-area: main;
+    padding: 50px;
+    textarea, input {
+      margin: 0;
+      border: none;
+      width: 100%;
+      height: 100%;
+    }
   }
   .calendar input {
     border: none;
