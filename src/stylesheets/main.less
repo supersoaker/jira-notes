@@ -55,6 +55,16 @@ a {
     display: grid;
     align-content: center;
     justify-content: center;
+    .calendar {
+      input {
+        border: none;
+        text-align: center;
+        font-weight: bold;
+        font-size: 2rem;
+        margin-bottom: 5px;
+        color: #525252;
+      }
+    }
   }
   .content {
     grid-area: content;
@@ -71,15 +81,23 @@ a {
     input {
       text-transform: uppercase;
     }
-  }
-  .calendar {
-    input {
-      border: none;
-      text-align: center;
-      font-weight: bold;
-      font-size: 2rem;
-      margin-bottom: 5px;
-      color: #525252;
+    .work-log-item {
+      .status-column > svg {
+        width: 20px;
+        height: 20px;
+        margin: 0 auto;
+        display: none;
+      }
+      [data-status="saved"] .status-saved {
+        display: block;
+      }
+      [data-status="upload"] .status-upload {
+        cursor: pointer;
+        display: block;
+      }
+      [data-status="error"] .status-error {
+        display: block;
+      }
     }
   }
 }
