@@ -32,7 +32,52 @@ let escapeHTML = (str) => {
         .replace(/'/g, "&#039;");
 };
 
+let observeDOM = (function(){
+    let MutationObserver = window.MutationObserver || window.WebKitMutationObserver,
+        eventListenerSupported = window.addEventListener;
+
+    return function(obj, callback){
+        if( MutationObserver ){
+            // define a new observer
+            let obs = new MutationObserver(function(mutations, observer){
+                if( mutations[0].addedNodes.length || mutations[0].removedNodes.length )
+                    callback();
+            });
+            // have the observer observe foo for changes in children
+            obs.observe( obj, { childList:true, subtree:true });
+        }
+        else if( eventListenerSupported ){
+            obj.addEventListener('DOMNodeInserted', callback, false);
+            obj.addEventListener('DOMNodeRemoved', callback, false);
+        }
+    };
+})();
+
+// Observe a specific DOM element:
+observeDOM( document.getElementById('work-log-list') ,function(){
+
+    // Update time spend sum
+    let sum = '';
+    document.querySelectorAll('.work-log-item .time-spend').forEach((elem) => {
+        if(elem.indexOf('<input') === -1) {
+            let elems = elem.split(' ');
+            for (let i in elems) {
+                if(elems.indexOf('d')) {
+
+                }
+            }
+            sum += elem.innerHTML;
+        }
+    });
+    console.log(sum)
+    document.getElementById('time-spent-sum').innerHTML = '1';
+});
+
 class UiController {
+    static updateTimeSpent() {
+
+    }
+
     static showWorkLogs(workLogs = []) {
         let html = '';
         for(let j = 0; j <= workLogs.length; j++) {
@@ -43,9 +88,9 @@ class UiController {
                     <svg class="status-upload" viewBox="0 0 1024 768" aria-labelledby="bzsi-ant-cloud-upload-o-title"><path d="M602 64q49 0 91 17 43 17 77 51 35 34 53 76 15 34 17 75l2 32 27 17q32 21 55 54l3 5q16 25 25 52 8 27 8 57 0 42-15 78-16 36-46.5 66T831 689t-80 15H243q-37 0-69-13-31-13-57-38-27-26-40-57t-13-67q0-30 10-57.5t29-51.5q22-26 50-42l38-22-6-43q-1-7-1-17 0-23 8-44 9-21 27-38 17-17 38-25 22-9 46-9 19 0 35 5l43 13 26-37q25-33 61-57 60-40 134-40zm0-64q-94 0-170 51-45 30-76 73-25-8-53-8-37 0-70 13.5T174 169q-27 26-41 58-13 33-13 70 0 13 1 26-38 22-67 57Q0 445 0 529q0 50 18 93 18 42 53.5 76.5t79 52T243 768h508q55 0 104-19.5t88.5-58.5 59.5-86q21-49 21-104 0-79-44-145-31-46-76-76-3-51-22-97-23-52-67-96-44-42-98-64Q664 0 602 0zm39 608V302l95 95q9 9 22.5 9t22.5-9q9-10 9-23t-9-23L632 202q-10-9-23-9t-23 9L437 351q-9 10-9 23t9 23q9 9 22.5 9t22.5-9l95-95v306q0 13 9.5 22.5T609 640t22.5-9.5T641 608z"></path></svg>
                     <svg class="status-error" viewBox="0 0 1024 1024" aria-labelledby="cwsi-ant-exclamation-circle-o-title"><path d="M512 704q-13 0-22.5-9.5T480 672V224q0-13 9.5-22.5T512 192t22.5 9.5T544 224v448q0 13-9.5 22.5T512 704zm0 128q-13 0-22.5-9.5T480 800t9.5-22.5T512 768t22.5 9.5T544 800t-9.5 22.5T512 832zm0-768q91 0 174 35 81 34 143 96t96 143q35 83 35 174t-35 174q-34 81-96 143t-143 96q-83 35-174 35t-174-35q-81-34-143-96T99 686q-35-83-35-174t35-174q34-81 96-143t143-96q83-35 174-35zm0-64Q373 0 255 68.5T68.5 255 0 512t68.5 257T255 955.5t257 68.5 257-68.5T955.5 769t68.5-257-68.5-257T769 68.5 512 0z"></path></svg>
                 </td>
-                <td>${!!workLogs[j] ? escapeHTML(workLogs[j].comment) : '<textarea></textarea>'}</td>
-                <td>${!!workLogs[j] ? escapeHTML(workLogs[j].issueKey) : '<input type="text">'}</td>
-                <td>${!!workLogs[j] ? escapeHTML(workLogs[j].timeSpent) : '<input type="text">'}</td>
+                <td>${workLogs[j] ? escapeHTML(workLogs[j].comment) : '<textarea></textarea>'}</td>
+                <td>${workLogs[j] ? escapeHTML(workLogs[j].issueKey) : '<input type="text">'}</td>
+                <td class="time-spend">${workLogs[j] ? escapeHTML(workLogs[j].timeSpent) : '<input type="text">'}</td>
             </tr>`;
         }
         document.getElementById('work-log-list').innerHTML = html;
