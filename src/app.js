@@ -10,6 +10,7 @@ import jetpack from 'fs-jetpack';
 // import { greet } from './hello_world/hello_world';
 import {callApi} from './jira/api';
 import env from './env';
+
 const flatpickr = require("flatpickr");
 const app = remote.app;
 const appDir = jetpack.cwd(app.getAppPath());
@@ -19,9 +20,9 @@ const appDir = jetpack.cwd(app.getAppPath());
 const manifest = appDir.read('package.json', 'json');
 
 const osMap = {
-    win32: 'Windows',
+    win32:  'Windows',
     darwin: 'macOS',
-    linux: 'Linux',
+    linux:  'Linux',
 };
 
 let escapeHTML = (str) => {
@@ -32,42 +33,45 @@ let escapeHTML = (str) => {
         .replace(/'/g, "&#039;");
 };
 
-let observeDOM = (function(){
+let observeDOM = (function () {
     let MutationObserver = window.MutationObserver || window.WebKitMutationObserver,
         eventListenerSupported = window.addEventListener;
 
-    return function(obj, callback){
-        if( MutationObserver ){
+    return function (obj, callback) {
+        if (MutationObserver) {
             // define a new observer
-            let obs = new MutationObserver(function(mutations, observer){
-                if( mutations[0].addedNodes.length || mutations[0].removedNodes.length )
+            let obs = new MutationObserver(function (mutations, observer) {
+                if (mutations[0].addedNodes.length || mutations[0].removedNodes.length) {
                     callback();
+                }
             });
             // have the observer observe foo for changes in children
-            obs.observe( obj, { childList:true, subtree:true });
+            obs.observe(obj, {childList: true, subtree: true});
         }
-        else if( eventListenerSupported ){
-            obj.addEventListener('DOMNodeInserted', callback, false);
-            obj.addEventListener('DOMNodeRemoved', callback, false);
+        else {
+            if (eventListenerSupported) {
+                obj.addEventListener('DOMNodeInserted', callback, false);
+                obj.addEventListener('DOMNodeRemoved', callback, false);
+            }
         }
     };
 })();
 
 // Observe a specific DOM element:
-observeDOM( document.getElementById('work-log-list') ,function(){
+observeDOM(document.getElementById('work-log-list'), function () {
 
     // Update time spend sum
     let sum = '';
     document.querySelectorAll('.work-log-item .time-spend').forEach((elem) => {
-        if(elem.indexOf('<input') === -1) {
-            let elems = elem.split(' ');
-            for (let i in elems) {
-                if(elems.indexOf('d')) {
-
-                }
-            }
-            sum += elem.innerHTML;
-        }
+        // if(elem.indexOf('<input') === -1) {
+        //     let elems = elem.split(' ');
+        //     for (let i in elems) {
+        //         if(elems.indexOf('d')) {
+        //
+        //         }
+        //     }
+        //     sum += elem.innerHTML;
+        // }
     });
     console.log(sum)
     document.getElementById('time-spent-sum').innerHTML = '1';
@@ -80,7 +84,7 @@ class UiController {
 
     static showWorkLogs(workLogs = []) {
         let html = '';
-        for(let j = 0; j <= workLogs.length; j++) {
+        for (let j = 0; j <= workLogs.length; j++) {
             html += `
             <tr class="work-log-item">
                 <td class="status-column" data-status="saved">
@@ -117,7 +121,8 @@ class UiController {
         if (!msg) {
             document.querySelector('.message-wrapper').classList.add('hide');
             document.querySelector('.message-wrapper').classList.remove('error');
-        } else {
+        }
+        else {
             document.querySelector('.message-wrapper').innerHTML = msg;
             document.querySelector('.message-wrapper').classList.remove('hide');
             document.querySelector('.message-wrapper').classList.add('error');
@@ -126,32 +131,37 @@ class UiController {
 }
 
 
-
 flatpickr(".calendar input", {
     defaultDate: new Date(),
-    onChange: function (obj, dateString) {
+    onChange:    function (obj, dateString) {
         let user = localStorage.getItem('jira-user');
         let xhr = callApi(
             localStorage.getItem('jira-host'),
             user,
             localStorage.getItem('jira-pass'),
-            `search?jql=timespent > 0 AND worklogAuthor=${user} AND worklogDate=${dateString}`
-        );
-        if (xhr.status === 200) {
-            let response = JSON.parse(xhr.responseText);
-            let workLogs = [];
-            for (let i in response.issues) {
-                let tempXhr = callApi(localStorage.getItem('jira-host'), user, localStorage.getItem('jira-pass'), `issue/${response.issues[i].id}/worklog`);
-                let workLogArray = JSON.parse(tempXhr.responseText)['worklogs'];
-                for (let j in workLogArray) {
-                    if (workLogArray[j].author && workLogArray[j].author.name === user) {
-                        workLogArray[j].issueKey = response.issues[i].key;
-                        workLogs.push(workLogArray[j]);
-                    }
+            `search?jql=timespent > 0 AND worklogAuthor=${user} AND worklogDate='${dateString}'`,
+            (response) => {
+                let workLogs = [];
+                response = JSON.parse(response);
+                // tempWorklog['issueKey'] = response.issues[i].key;
+                // tempWorklog['comment'] = response.issues[i].key;
+                // tempWorklog['timeSpent'] = response.issues[i].key;
+                for (let i in response.issues) {
+                    callApi(localStorage.getItem('jira-host'), user, localStorage.getItem('jira-pass'), `issue/${response.issues[i].id}/worklog`, (response2) => {
+                        let workLogArray = JSON.parse(response2)['worklogs'];
+                        for (let j in workLogArray) {
+                            if (workLogArray[j].author && workLogArray[j].author.name == user) {
+                                workLogArray[j].issueKey = response.issues[i].key;
+                                workLogs.push(workLogArray[j]);
+                            }
+                        }
+                        if (i == response.issues.length - 1) {
+                            UiController.showWorkLogs(workLogs);
+                        }
+                    });
                 }
             }
-            UiController.showWorkLogs(workLogs);
-        }
+        );
     }
 });
 
@@ -165,24 +175,25 @@ document.querySelector('#sign-in-form').addEventListener('submit', (e) => {
     let form = new FormData(e.target);
     try {
         /** @var XMLHTTPRequest xhr */
-        let xhr = callApi(form.get('host'), form.get('user'), form.get('pass'));
-        if (xhr.status === 200) {
+        let xhr = callApi(form.get('host'), form.get('user'), form.get('pass'), (response) => {
             localStorage.setItem('jira-host', form.get('host'));
             localStorage.setItem('jira-user', form.get('user'));
             localStorage.setItem('jira-pass', form.get('pass'));
-            localStorage.setItem('jira-projects', xhr.responseText);
+            localStorage.setItem('jira-projects', response);
             UiController.showPage('overview');
-        }
-        if (xhr.status === 401 || xhr.status === 403) {
-            showError('Bad credentials');
-        }
-        if (xhr.responseText === '[]') {
-            showError('Wrong url or no projects available');
-        }
-        if (xhr.status === 0) {
-            showError('Error when accessing url');
-        }
-    } catch (e) {
+        }, (e, xhr) => {
+            if (xhr.status === 401 || xhr.status === 403) {
+                showError('Bad credentials');
+            }
+            if (xhr.responseText === '[]') {
+                showError('Wrong url or no projects available');
+            }
+            if (xhr.status === 0) {
+                showError('Error when accessing url');
+            }
+        });
+    }
+    catch (e) {
         showError('Error when accessing url');
     }
     e.preventDefault();
