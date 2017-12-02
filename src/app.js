@@ -9,6 +9,7 @@ import {remote} from 'electron';
 import jetpack from 'fs-jetpack';
 // import { greet } from './hello_world/hello_world';
 import {callApi} from './jira/api';
+import {convertTimeFromJira} from './jira/converter';
 import env from './env';
 
 const flatpickr = require("flatpickr");
@@ -59,7 +60,6 @@ let observeDOM = (function () {
 
 // Observe a specific DOM element:
 observeDOM(document.getElementById('work-log-list'), function () {
-
     // Update time spend sum
     let sum = '';
     document.querySelectorAll('.work-log-item .time-spend').forEach((elem) => {
@@ -73,8 +73,6 @@ observeDOM(document.getElementById('work-log-list'), function () {
         //     sum += elem.innerHTML;
         // }
     });
-    console.log(sum)
-    document.getElementById('time-spent-sum').innerHTML = '1';
 });
 
 class UiController {
@@ -84,6 +82,8 @@ class UiController {
 
     static showWorkLogs(workLogs = []) {
         let html = '';
+        let timeLogs = [];
+        console.log(workLogs)
         for (let j = 0; j <= workLogs.length; j++) {
             html += `
             <tr class="work-log-item">
@@ -96,8 +96,11 @@ class UiController {
                 <td>${workLogs[j] ? escapeHTML(workLogs[j].issueKey) : '<input type="text">'}</td>
                 <td class="time-spend">${workLogs[j] ? escapeHTML(workLogs[j].timeSpent) : '<input type="text">'}</td>
             </tr>`;
+            timeLogs.push(workLogs[j].timeSpent);
         }
+        console.log(timeLogs)
         document.getElementById('work-log-list').innerHTML = html;
+        document.getElementById('time-spent-sum').innerHTML = convertTimeFromJira(timeLogs);
 
     };
 
