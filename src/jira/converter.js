@@ -15,9 +15,9 @@ export const convertTimeFromJira = (time = 0) => {
     let sum = 0;
     time += ''; // time to string
     time.split(' ').forEach(function (item) {
-        if(item.toUpperCase().indexOf('D') >= 0) {
-            sum += (+item.slice(0, -1)) * 480;
-        }
+        // if(item.toUpperCase().indexOf('D') >= 0) {
+        //     sum += (+item.slice(0, -1)) * 480;
+        // }
         if(item.toUpperCase().indexOf('H') >= 0) {
             sum += (+item.slice(0, -1)) * 60;
         }
@@ -34,16 +34,16 @@ export const convertTimeFromJira = (time = 0) => {
  */
 export const convertMinutesToJira = (time = 0) => {
     let timeString = '';
-    if(time / 480 > 1) {
-        timeString += parseInt(time / 480) + 'd';
-        time = time % 480;
-    }
+    // if(time / 480 > 1) {
+    //     timeString += parseInt(time / 480) + 'd';
+    //     time = time % 480;
+    // }
     if(time / 60 > 1) {
-        timeString += parseInt(time / 60) + 'h';
+        timeString += ' ' + parseInt(time / 60) + 'h';
         time = time % 60;
     }
     if(time >= 1) {
-        timeString += time + 'm';
+        timeString += ` ${time}m`;
     }
 
     return timeString;

@@ -83,7 +83,7 @@ class UiController {
     static showWorkLogs(workLogs = []) {
         let html = '';
         let timeLogs = [];
-        for (let j = 0; j < workLogs.length; j++) {
+        for (let j = 0; j <= workLogs.length; j++) {
             html += `
             <tr class="work-log-item">
                 <td class="status-column" data-status="saved">
@@ -95,7 +95,9 @@ class UiController {
                 <td>${workLogs[j] ? escapeHTML(workLogs[j].issueKey) : '<input type="text">'}</td>
                 <td class="time-spend">${workLogs[j] ? escapeHTML(workLogs[j].timeSpent) : '<input type="text">'}</td>
             </tr>`;
-            timeLogs.push(workLogs[j].timeSpent);
+            if(workLogs[j] ) {
+                timeLogs.push(workLogs[j].timeSpent);
+            }
         }
         document.getElementById('work-log-list').innerHTML = html;
         document.getElementById('time-spent-sum').innerHTML = convertMinutesToJira(convertTimeFromJira(timeLogs));
@@ -151,7 +153,12 @@ flatpickr(".calendar input", {
                     callApi(localStorage.getItem('jira-host'), user, localStorage.getItem('jira-pass'), `issue/${response.issues[i].id}/worklog`, (response2) => {
                         let workLogArray = JSON.parse(response2)['worklogs'];
                         for (let j in workLogArray) {
-                            if (workLogArray[j].author && workLogArray[j].author.name == user) {
+                            let actualDate = new Date(dateString);
+                            let dateToCheck = new Date(workLogArray[j].started);
+                            let sameDate = (dateToCheck.getDate() === actualDate.getDate()
+                                && dateToCheck.getMonth() === actualDate.getMonth()
+                                && dateToCheck.getFullYear() === actualDate.getFullYear());
+                            if (workLogArray[j].author.name == user && sameDate) {
                                 workLogArray[j].issueKey = response.issues[i].key;
                                 workLogs.push(workLogArray[j]);
                             }
