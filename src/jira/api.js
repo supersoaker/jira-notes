@@ -3,7 +3,7 @@ export const callApi = (url, username, password, query = 'project', success, err
 
     let client = new XMLHttpRequest();
 
-    url = `${url}/rest/api/2/${query}`;
+    url = `${url}/${query}`;
     // rest/api/2/project
 
     // async !!1
