@@ -82,8 +82,8 @@ flatpickr(".calendar input", {
                 if (response.length > 0) {
                     UiController.showWorkLogs(response);
                 }
-            }
-        }, dateString);
+            },
+        dateString);
     }
 });
 
