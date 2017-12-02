@@ -26,7 +26,6 @@ const osMap = {
     darwin: 'macOS',
     linux:  'Linux',
 };
-
 let observeDOM = (function () {
     let MutationObserver = window.MutationObserver || window.WebKitMutationObserver,
         eventListenerSupported = window.addEventListener;
@@ -80,7 +79,7 @@ flatpickr(".calendar input", {
             (response) => {
                 response = JSON.parse(response);
                 if (response.length > 0) {
-                    UiController.showWorkLogs(response);
+                    UiController.showWorkLogs(response, dateString);
                 }
             }
         );
@@ -90,6 +89,8 @@ flatpickr(".calendar input", {
 if (localStorage.getItem('jira-host')) {
     UiController.showPage('overview');
 }
+
+
 
 document.querySelector('#sign-in-form').addEventListener('submit', (e) => {
     let form = new FormData(e.target);
