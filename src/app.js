@@ -8,7 +8,7 @@ import './helpers/external_links.js';
 import {remote} from 'electron';
 import jetpack from 'fs-jetpack';
 // import { greet } from './hello_world/hello_world';
-import {callApi} from './jira/api';
+import {jiraApi} from './jira/api';
 import {convertTimeFromJira, convertMinutesToJira} from './jira/converter';
 import env from './env';
 
@@ -138,38 +138,32 @@ flatpickr(".calendar input", {
     defaultDate: new Date(),
     onChange:    function (obj, dateString) {
         let user = localStorage.getItem('jira-user');
-        let xhr = callApi(
-            localStorage.getItem('jira-host'),
-            user,
-            localStorage.getItem('jira-pass'),
-            `search?jql=timespent > 0 AND worklogAuthor=${user} AND worklogDate='${dateString}'`,
-            (response) => {
-                let workLogs = [];
-                response = JSON.parse(response);
-                // tempWorklog['issueKey'] = response.issues[i].key;
-                // tempWorklog['comment'] = response.issues[i].key;
-                // tempWorklog['timeSpent'] = response.issues[i].key;
-                for (let i in response.issues) {
-                    callApi(localStorage.getItem('jira-host'), user, localStorage.getItem('jira-pass'), `issue/${response.issues[i].id}/worklog`, (response2) => {
-                        let workLogArray = JSON.parse(response2)['worklogs'];
-                        for (let j in workLogArray) {
-                            let actualDate = new Date(dateString);
-                            let dateToCheck = new Date(workLogArray[j].started);
-                            let sameDate = (dateToCheck.getDate() === actualDate.getDate()
-                                && dateToCheck.getMonth() === actualDate.getMonth()
-                                && dateToCheck.getFullYear() === actualDate.getFullYear());
-                            if (workLogArray[j].author.name == user && sameDate) {
-                                workLogArray[j].issueKey = response.issues[i].key;
-                                workLogs.push(workLogArray[j]);
-                            }
+        let xhr = jiraApi.getWorklogByDate((response) => {
+            let workLogs = [];
+            response = JSON.parse(response);
+            // tempWorklog['issueKey'] = response.issues[i].key;
+            // tempWorklog['comment'] = response.issues[i].key;
+            // tempWorklog['timeSpent'] = response.issues[i].key;
+            for (let i in response.issues) {
+                callApi(localStorage.getItem('jira-host'), user, localStorage.getItem('jira-pass'), `issue/${response.issues[i].id}/worklog`, (response2) => {
+                    let workLogArray = JSON.parse(response2)['worklogs'];
+                    for (let j in workLogArray) {
+                        let actualDate = new Date(dateString);
+                        let dateToCheck = new Date(workLogArray[j].started);
+                        let sameDate = (dateToCheck.getDate() === actualDate.getDate()
+                        && dateToCheck.getMonth() === actualDate.getMonth()
+                        && dateToCheck.getFullYear() === actualDate.getFullYear());
+                        if (workLogArray[j].author.name == user && sameDate) {
+                            workLogArray[j].issueKey = response.issues[i].key;
+                            workLogs.push(workLogArray[j]);
                         }
-                        if (i == response.issues.length - 1) {
-                            UiController.showWorkLogs(workLogs);
-                        }
-                    });
-                }
+                    }
+                    if (i == response.issues.length - 1) {
+                        UiController.showWorkLogs(workLogs);
+                    }
+                });
             }
-        );
+        }, dateString);
     }
 });
 
@@ -183,23 +177,10 @@ document.querySelector('#sign-in-form').addEventListener('submit', (e) => {
     let form = new FormData(e.target);
     try {
         /** @var XMLHTTPRequest xhr */
-        let xhr = callApi(form.get('host'), form.get('user'), form.get('pass'), 'project/', (response) => {
-            localStorage.setItem('jira-host', form.get('host'));
-            localStorage.setItem('jira-user', form.get('user'));
-            localStorage.setItem('jira-pass', form.get('pass'));
-            localStorage.setItem('jira-projects', response);
-            UiController.showPage('overview');
-        }, (e, xhr) => {
-            if (xhr.status === 401 || xhr.status === 403) {
-                showError('Bad credentials');
-            }
-            if (xhr.responseText === '[]') {
-                showError('Wrong url or no projects available');
-            }
-            if (xhr.status === 0) {
-                showError('Error when accessing url');
-            }
-        });
+        localStorage.setItem('jira-host', form.get('host'));
+        localStorage.setItem('jira-user', form.get('user'));
+        localStorage.setItem('jira-pass', form.get('pass'));
+        let xhr = jiraApi.signIn();
     }
     catch (e) {
         showError('Error when accessing url');
