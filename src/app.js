@@ -9,7 +9,7 @@ import {remote} from 'electron';
 import jetpack from 'fs-jetpack';
 // import { greet } from './hello_world/hello_world';
 import {callApi} from './jira/api';
-import {convertTimeFromJira} from './jira/converter';
+import {convertTimeFromJira, convertMinutesToJira} from './jira/converter';
 import env from './env';
 
 const flatpickr = require("flatpickr");
@@ -83,8 +83,7 @@ class UiController {
     static showWorkLogs(workLogs = []) {
         let html = '';
         let timeLogs = [];
-        console.log(workLogs)
-        for (let j = 0; j <= workLogs.length; j++) {
+        for (let j = 0; j < workLogs.length; j++) {
             html += `
             <tr class="work-log-item">
                 <td class="status-column" data-status="saved">
@@ -98,9 +97,8 @@ class UiController {
             </tr>`;
             timeLogs.push(workLogs[j].timeSpent);
         }
-        console.log(timeLogs)
         document.getElementById('work-log-list').innerHTML = html;
-        document.getElementById('time-spent-sum').innerHTML = convertTimeFromJira(timeLogs);
+        document.getElementById('time-spent-sum').innerHTML = convertMinutesToJira(convertTimeFromJira(timeLogs));
 
     };
 
@@ -178,7 +176,7 @@ document.querySelector('#sign-in-form').addEventListener('submit', (e) => {
     let form = new FormData(e.target);
     try {
         /** @var XMLHTTPRequest xhr */
-        let xhr = callApi(form.get('host'), form.get('user'), form.get('pass'), (response) => {
+        let xhr = callApi(form.get('host'), form.get('user'), form.get('pass'), 'project/', (response) => {
             localStorage.setItem('jira-host', form.get('host'));
             localStorage.setItem('jira-user', form.get('user'));
             localStorage.setItem('jira-pass', form.get('pass'));

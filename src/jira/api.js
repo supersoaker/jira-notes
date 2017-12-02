@@ -1,4 +1,4 @@
-export const callApi = (url, username, password, query = 'project', success, error) => {
+export const callApi = (url, username, password, query = 'project', success, error = () => {}) => {
     let JSONObject = {"username": "" + username + "", "password": "" + password + ""};
 
     let client = new XMLHttpRequest();
@@ -21,6 +21,7 @@ export const callApi = (url, username, password, query = 'project', success, err
         }
     };
     client.onerror = function (e) {
+
         error(e, client);
     };
 
